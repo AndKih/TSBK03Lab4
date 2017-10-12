@@ -63,8 +63,9 @@ void SpriteBehavior() // Din kod!
 	float savedXSpeed[6] = {0};
 	float savedYSpeed[6] = {0};
 	float kCohesionWeight = 0.003f;
-	float kSeparationWeight = 0.01f;
-	float kAlignmentWeight = 0.005f;
+	float kSeparationWeight = 0.05f;
+	float kAlignmentWeight = 0.01f;
+	float maxSpeed = 3.0f;
 	int it = 0;
 	do
 	{
@@ -85,7 +86,43 @@ void SpriteBehavior() // Din kod!
 	      SpritePtr otherSP = gSpriteRoot;
 	      do
 	      {
-		     if(sp != otherSP)
+		     float diffH = otherSP->position.h - sp->position.h;
+		     float diffV = otherSP->position.v - sp->position.v;
+		     float lenDiff = sqrt(pow(diffH,2) + pow(diffV,2));
+
+		     float lenSpeed = sqrt(pow(sp->speed.h,2) + pow(sp->speed.v,2));
+		     float scalar = (sp->speed.h*diffH) + (sp->speed.v*diffV);
+		     float multLen = lenDiff*lenSpeed;
+		     
+		     float cosAngle = 0;
+		     if(abs(multLen) > 0.00001)
+		     {
+		       cosAngle = scalar/multLen;
+		     }
+		     /*printf("DiffVector:\n(");
+		     printf("%.2f", diffH);
+		     printf(", ");
+		     printf("%.2f)\n", diffV);
+		     printf("SpeedVector:\n(");
+		     printf("%.2f", sp->speed.h);
+		     printf(", ");
+		     printf("%.2f)\n", sp->speed.v);
+		     printf("Lengths:\n(");
+		     printf("%.2f", lenDiff);
+		     printf(", ");
+		     printf("%.2f)\n", lenSpeed);
+		     printf("Scalar: ");
+		     printf("%.2f\n", scalar);
+		     printf("totalLength: ");
+		     printf("%.2f\n", multLen);
+		     printf("CosAngle: ");
+		     printf("%.2f\n", cosAngle);*/
+		     float angle = acos(cosAngle);
+		     /*printf("Angle: ");
+		     printf("%.2f\n\n\n\n", angle);*/
+		     float thres = 3.5*(M_PI/4);
+		     //if(sp != otherSP)
+		     if(sp != otherSP && (angle < thres))
 		     {
 			    float boidDistance = returnEuclidDistance(sp->position.h, sp->position.v, 
 								      otherSP->position.h, otherSP->position.v);
@@ -214,6 +251,14 @@ void SpriteBehavior() // Din kod!
 	      sp->speed.v += accuAvoidanceY*kSeparationWeight;
 	      **/
 	      
+	      if(sp->speed.h > maxSpeed)
+		  sp->speed.h = maxSpeed;
+	      if(sp->speed.h < -maxSpeed)
+		  sp->speed.h = -maxSpeed;
+	      if(sp->speed.v > maxSpeed)
+		  sp->speed.v = maxSpeed;
+	      if(sp->speed.v < -maxSpeed)
+		  sp->speed.v = -maxSpeed;
 	      sp = sp->next;
 	      it += 1;
 	}while(sp != NULL);
